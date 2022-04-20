@@ -11,20 +11,22 @@ const AUTH_HEADER: &str = "authorization";
 pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
+    token_key: Vec<u8>,
     ignore_full_paths: Option<HashMap<String, String>>,
     ignore_start_path: Option<Vec<String>>,
 }
 
 impl AuthMiddleware {
-    pub fn new() -> Self {
+    pub fn new(token_key: Vec<u8>) -> Self {
         Self {
+            token_key,
             ignore_full_paths: None,
             ignore_start_path: None,
         }
     }
 
-    pub fn new_with_default_paths_to_ignore() -> Self {
-        let mut result = Self::new();
+    pub fn new_with_default_paths_to_ignore(encryption_key: Vec<u8>) -> Self {
+        let mut result = Self::new(encryption_key);
 
         result.add_start_path_to_ignore("/swagger");
 
@@ -84,7 +86,10 @@ impl HttpServerMiddleware for AuthMiddleware {
 
         match ctx.request.get_headers().get(AUTH_HEADER) {
             Some(header) => {
-                if let Some(session_token) = SessionToken::parse_from_header(header.as_bytes()) {
+                if let Some(session_token) = SessionToken::parse_from_header(
+                    header.as_bytes().to_vec(),
+                    self.token_key.clone(),
+                ) {
                     let now = DateTimeAsMicroseconds::now();
 
                     if session_token.get_expires_microseconds() >= now.unix_microseconds {
