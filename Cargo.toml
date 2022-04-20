@@ -8,7 +8,9 @@ edition = "2021"
 [dependencies]
 my-http-server = { branch = "0.2.3", git = "https://github.com/MyJetTools/my-http-server.git" }
 my-http-server-controllers = { branch = "0.2.3", git = "https://github.com/MyJetTools/my-http-server-controllers.git" }
+rust-extensions = { branch = "main", git = "https://github.com/MyJetTools/rust-extensions.git" }
 my-http-server-swagger = { branch = "0.2.3", git = "https://github.com/MyJetTools/my-http-server-swagger.git" }
+
 
 async-trait = "*"
 tonic = { version = "*", features = ["tls", "tls-roots", "prost"] }
@@ -20,3 +22,4 @@ serde = { version = "*", features = ["derive"] }
 tokio-util = "*"
 futures = "*"
 signal-hook = "*"
+prost-types = "*"
