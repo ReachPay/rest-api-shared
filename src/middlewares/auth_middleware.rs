@@ -17,19 +17,17 @@ pub struct AuthMiddleware {
 }
 
 impl AuthMiddleware {
-    pub fn new(token_key: Vec<u8>) -> Self {
+    pub fn new(token_key: &[u8]) -> Self {
         Self {
-            token_key,
+            token_key: comb_the_key(token_key),
             ignore_full_paths: None,
             ignore_start_path: None,
         }
     }
 
-    pub fn new_with_default_paths_to_ignore(encryption_key: Vec<u8>) -> Self {
+    pub fn new_with_default_paths_to_ignore(encryption_key: &[u8]) -> Self {
         let mut result = Self::new(encryption_key);
-
         result.add_start_path_to_ignore("/swagger");
-
         result
     }
 
@@ -116,4 +114,20 @@ impl HttpServerMiddleware for AuthMiddleware {
             }
         }
     }
+}
+
+fn comb_the_key(token_key: &[u8]) -> Vec<u8> {
+    let mut result = Vec::with_capacity(32);
+
+    let mut i: usize = 0;
+    while result.len() < result.capacity() {
+        result.push(token_key[i]);
+        i += 1;
+
+        if i >= token_key.len() {
+            i = 0;
+        }
+    }
+
+    result
 }
