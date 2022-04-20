@@ -1,34 +1,25 @@
 use std::collections::HashMap;
 
-use aes::{
-    cipher::{generic_array::GenericArray, KeyInit},
-    Aes256,
-};
-
 use my_http_server::{
     HttpContext, HttpFailResult, HttpOkResult, HttpServerMiddleware, HttpServerRequestFlow,
 };
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
-use crate::session_token::SessionToken;
+use crate::session_token::{SessionToken, TokenKey};
 
 const AUTH_HEADER: &str = "authorization";
 pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
-    cypher: Aes256,
+    token_key: TokenKey,
     ignore_full_paths: Option<HashMap<String, String>>,
     ignore_start_path: Option<Vec<String>>,
 }
 
 impl AuthMiddleware {
     pub fn new() -> Self {
-        let key = comb_the_key(get_token_key().as_slice());
-
-        let key = GenericArray::from_slice(key.as_slice());
-
         Self {
-            cypher: Aes256::new(&key),
+            token_key: TokenKey::new(),
             ignore_full_paths: None,
             ignore_start_path: None,
         }
@@ -95,7 +86,7 @@ impl HttpServerMiddleware for AuthMiddleware {
             Some(header) => {
                 if let Some(session_token) = SessionToken::parse_from_token(
                     std::str::from_utf8(header.as_bytes()).unwrap(),
-                    &self.cypher,
+                    &self.token_key,
                 ) {
                     let now = DateTimeAsMicroseconds::now();
 
@@ -121,31 +112,6 @@ impl HttpServerMiddleware for AuthMiddleware {
                     "Token is missing".to_string().into(),
                 ));
             }
-        }
-    }
-}
-
-fn comb_the_key(token_key: &[u8]) -> Vec<u8> {
-    let mut result = Vec::with_capacity(32);
-
-    let mut i: usize = 0;
-    while result.len() < result.capacity() {
-        result.push(token_key[i]);
-        i += 1;
-
-        if i >= token_key.len() {
-            i = 0;
-        }
-    }
-
-    result
-}
-
-fn get_token_key() -> Vec<u8> {
-    match std::env::var("TOKEN_KEY") {
-        Ok(result) => result.into_bytes(),
-        Err(_) => {
-            panic!("Can not read environment variable TOKEN_KEY");
         }
     }
 }

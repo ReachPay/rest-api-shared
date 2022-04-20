@@ -1,9 +1,6 @@
-use aes::{
-    cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt},
-    Aes256,
-};
-
 use rust_extensions::date_time::DateTimeAsMicroseconds;
+
+use super::TokenKey;
 
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionToken {
@@ -33,32 +30,30 @@ impl SessionToken {
         self.expires
     }
 
-    pub fn as_token(&self, cipher: &Aes256) -> String {
+    pub fn into_token(&self, token_key: &TokenKey) -> String {
         let mut token_payload = Vec::new();
         prost::Message::encode(self, &mut token_payload).unwrap();
 
-        let mut block = GenericArray::from_iter(token_payload);
+        let ciphertext = enc_file::encrypt_aes(token_payload, token_key.key.as_str()).unwrap();
 
-        cipher.encrypt_block(&mut block);
-
-        base64::encode(block.iter().as_slice())
+        base64::encode(ciphertext)
     }
 
-    pub fn parse_from_token(token_as_str: &str, cipher: &Aes256) -> Option<SessionToken> {
-        let token_as_vec = base64::decode(token_as_str);
+    pub fn parse_from_token(token_as_str: &str, token_key: &TokenKey) -> Option<SessionToken> {
+        let encoded_token = base64::decode(token_as_str);
 
-        if token_as_vec.is_err() {
+        if encoded_token.is_err() {
             return None;
         }
 
-        let token_as_vec = token_as_vec.unwrap();
+        let result = enc_file::decrypt_aes(encoded_token.unwrap(), token_key.key.as_str());
 
-        let mut block = GenericArray::from_iter(token_as_vec);
-
-        cipher.decrypt_block(&mut block);
+        if result.is_err() {
+            return None;
+        }
 
         let result: Result<SessionToken, prost::DecodeError> =
-            prost::Message::decode(block.iter().as_slice());
+            prost::Message::decode(result.unwrap().as_slice());
 
         if result.is_err() {
             return None;
@@ -71,28 +66,21 @@ impl SessionToken {
 #[cfg(test)]
 mod test {
 
-    use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
-    use aes::Aes256;
-
     #[test]
     fn test_encrypt_decrypt() {
-        let key = GenericArray::from_slice([0u8; 32].as_slice());
+        use super::*;
+        use crate::session_token::TokenKey;
 
-        let mut block = GenericArray::from([42u8; 16]);
+        let token_key = TokenKey::from_string_token("an exampaaaaaaaaaaaaaaaaaaaaaaaa");
 
-        let cipher = Aes256::new(&key);
+        let session_token = SessionToken::new("user_id".to_string(), DateTimeAsMicroseconds::now());
 
-        let block_copy = block.clone();
+        let token_as_str = session_token.into_token(&token_key);
 
-        // Encrypt block in-place
-        cipher.encrypt_block(&mut block);
+        let session_token_from_token = SessionToken::parse_from_token(&token_as_str, &token_key);
 
-        println!("{:?}", block);
+        print!("{:?}", session_token_from_token);
 
-        // And decrypt it back
-        cipher.decrypt_block(&mut block);
-
-        println!("{:?}", block);
-        assert_eq!(block, block_copy);
+        assert_eq!(session_token, session_token_from_token.unwrap());
     }
 }
