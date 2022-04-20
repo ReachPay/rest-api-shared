@@ -1,5 +1,5 @@
 use aes::{
-    cipher::{generic_array::GenericArray, BlockDecrypt, KeyInit},
+    cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt},
     Aes256,
 };
 
@@ -33,11 +33,28 @@ impl SessionToken {
         self.expires
     }
 
-    pub fn parse_from_header(payload: Vec<u8>, token_key: Vec<u8>) -> Option<SessionToken> {
-        let key = GenericArray::from_iter(token_key);
-        let mut block = GenericArray::from_iter(payload);
+    pub fn as_token(&self, cipher: &Aes256) -> String {
+        let mut token_payload = Vec::new();
+        prost::Message::encode(self, &mut token_payload).unwrap();
 
-        let cipher = Aes256::new(&key);
+        let mut block = GenericArray::from_iter(token_payload);
+
+        cipher.encrypt_block(&mut block);
+
+        base64::encode(block.iter().as_slice())
+    }
+
+    pub fn parse_from_token(token_as_str: &str, cipher: &Aes256) -> Option<SessionToken> {
+        let token_as_vec = base64::decode(token_as_str);
+
+        if token_as_vec.is_err() {
+            return None;
+        }
+
+        let token_as_vec = token_as_vec.unwrap();
+
+        let mut block = GenericArray::from_iter(token_as_vec);
+
         cipher.decrypt_block(&mut block);
 
         let result: Result<SessionToken, prost::DecodeError> =

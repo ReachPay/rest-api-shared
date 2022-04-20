@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+use aes::{
+    cipher::{generic_array::GenericArray, KeyInit},
+    Aes256,
+};
+
 use my_http_server::{
     HttpContext, HttpFailResult, HttpOkResult, HttpServerMiddleware, HttpServerRequestFlow,
 };
@@ -11,15 +16,19 @@ const AUTH_HEADER: &str = "authorization";
 pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
-    token_key: Vec<u8>,
+    cypher: Aes256,
     ignore_full_paths: Option<HashMap<String, String>>,
     ignore_start_path: Option<Vec<String>>,
 }
 
 impl AuthMiddleware {
     pub fn new() -> Self {
+        let key = comb_the_key(get_token_key().as_slice());
+
+        let key = GenericArray::from_slice(key.as_slice());
+
         Self {
-            token_key: comb_the_key(get_token_key().as_slice()),
+            cypher: Aes256::new(&key),
             ignore_full_paths: None,
             ignore_start_path: None,
         }
@@ -84,9 +93,9 @@ impl HttpServerMiddleware for AuthMiddleware {
 
         match ctx.request.get_headers().get(AUTH_HEADER) {
             Some(header) => {
-                if let Some(session_token) = SessionToken::parse_from_header(
-                    header.as_bytes().to_vec(),
-                    self.token_key.clone(),
+                if let Some(session_token) = SessionToken::parse_from_token(
+                    std::str::from_utf8(header.as_bytes()).unwrap(),
+                    &self.cypher,
                 ) {
                     let now = DateTimeAsMicroseconds::now();
 
