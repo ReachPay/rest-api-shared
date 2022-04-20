@@ -11,20 +11,62 @@ const AUTH_HEADER: &str = "authorization";
 pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
-    ignore_paths: Option<HashMap<String, String>>,
+    ignore_full_paths: Option<HashMap<String, String>>,
+    ignore_start_path: Option<Vec<String>>,
 }
 
 impl AuthMiddleware {
     pub fn new() -> Self {
-        Self { ignore_paths: None }
+        Self {
+            ignore_full_paths: None,
+            ignore_start_path: None,
+        }
+    }
+
+    pub fn new_with_default_paths_to_ignore() -> Self {
+        let mut result = Self::new();
+
+        result.add_start_path_to_ignore("/swagger");
+
+        result
     }
 
     pub fn path_is_ignored(&self, path: &str) -> bool {
-        if let Some(ref items) = self.ignore_paths {
+        if let Some(ref items) = self.ignore_full_paths {
             return items.contains_key(path);
         }
 
+        if let Some(ref items) = self.ignore_start_path {
+            for item in items {
+                if path.starts_with(item) {
+                    return true;
+                }
+            }
+        }
+
         return false;
+    }
+
+    pub fn add_full_path_to_ignore(&mut self, path: &str) {
+        if self.ignore_full_paths.is_none() {
+            self.ignore_full_paths = Some(HashMap::new());
+        }
+
+        self.ignore_full_paths
+            .as_mut()
+            .unwrap()
+            .insert(path.to_string(), path.to_string());
+    }
+
+    pub fn add_start_path_to_ignore(&mut self, path: &str) {
+        if self.ignore_start_path.is_none() {
+            self.ignore_start_path = Some(Vec::new());
+        }
+
+        self.ignore_start_path
+            .as_mut()
+            .unwrap()
+            .push(path.to_string());
     }
 }
 
