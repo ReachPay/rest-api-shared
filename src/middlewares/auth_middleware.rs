@@ -17,16 +17,16 @@ pub struct AuthMiddleware {
 }
 
 impl AuthMiddleware {
-    pub fn new(token_key: &[u8]) -> Self {
+    pub fn new() -> Self {
         Self {
-            token_key: comb_the_key(token_key),
+            token_key: comb_the_key(get_token_key().as_slice()),
             ignore_full_paths: None,
             ignore_start_path: None,
         }
     }
 
-    pub fn new_with_default_paths_to_ignore(encryption_key: &[u8]) -> Self {
-        let mut result = Self::new(encryption_key);
+    pub fn new_with_default_paths_to_ignore() -> Self {
+        let mut result = Self::new();
         result.add_start_path_to_ignore("/swagger");
         result
     }
@@ -130,4 +130,13 @@ fn comb_the_key(token_key: &[u8]) -> Vec<u8> {
     }
 
     result
+}
+
+fn get_token_key() -> Vec<u8> {
+    match std::env::var("TOKEN_KEY") {
+        Ok(result) => result.into_bytes(),
+        Err(_) => {
+            panic!("Can not read environment variable TOKEN_KEY");
+        }
+    }
 }
