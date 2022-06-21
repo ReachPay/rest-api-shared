@@ -90,7 +90,7 @@ impl HttpServerMiddleware for AuthMiddleware {
                 ) {
                     let now = DateTimeAsMicroseconds::now();
 
-                    if session_token.get_expires_microseconds() >= now.unix_microseconds {
+                    if now.unix_microseconds >= session_token.get_expires_microseconds() {
                         return Err(HttpFailResult::as_unauthorized(
                             "Token is expired".to_string().into(),
                         ));
