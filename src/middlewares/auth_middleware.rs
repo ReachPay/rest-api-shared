@@ -17,16 +17,16 @@ pub struct AuthMiddleware {
 }
 
 impl AuthMiddleware {
-    pub fn new() -> Self {
+    pub fn new(token_key: TokenKey) -> Self {
         Self {
-            token_key: TokenKey::new(),
+            token_key,
             ignore_full_paths: None,
             ignore_start_path: None,
         }
     }
 
-    pub fn new_with_default_paths_to_ignore() -> Self {
-        let mut result = Self::new();
+    pub fn new_with_default_paths_to_ignore(token_key: TokenKey) -> Self {
+        let mut result = Self::new(token_key);
         result.add_start_path_to_ignore("/swagger");
         result
     }

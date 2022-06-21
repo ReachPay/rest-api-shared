@@ -3,14 +3,8 @@ pub struct TokenKey {
 }
 
 impl TokenKey {
-    pub fn new() -> Self {
-        let result = std::env::var("TOKEN_KEY");
-
-        if result.is_err() {
-            panic!("TOKEN_KEY environment variable is not set");
-        }
-
-        Self::from_string_token(result.unwrap().as_str())
+    pub fn new(token_key: &str) -> Self {
+        Self::from_string_token(token_key)
     }
 
     pub fn from_string_token(token_key: &str) -> Self {
