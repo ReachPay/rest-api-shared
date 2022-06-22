@@ -2,6 +2,7 @@ use my_http_server_swagger::MyHttpStringEnum;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, MyHttpStringEnum, Debug)]
+#[repr(i16)]
 pub enum ResultStatus {
     #[http_enum_case(id="0"; description="Operations was successful")]
     Ok,
