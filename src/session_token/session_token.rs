@@ -8,13 +8,16 @@ pub struct SessionToken {
     user_id: ::prost::alloc::string::String,
     #[prost(int64, tag = "2")]
     expires: i64,
+    #[prost(string, tag = "3")]
+    ip: ::prost::alloc::string::String,
 }
 
 impl SessionToken {
-    pub fn new(user_id: String, expires: DateTimeAsMicroseconds) -> Self {
+    pub fn new(user_id: String, expires: DateTimeAsMicroseconds, ip: String) -> Self {
         SessionToken {
             user_id,
             expires: expires.unix_microseconds,
+            ip,
         }
     }
 
@@ -73,7 +76,11 @@ mod test {
 
         let token_key = TokenKey::from_string_token("an exampaaaaaaaaaaaaaaaaaaaaaaaa");
 
-        let session_token = SessionToken::new("user_id".to_string(), DateTimeAsMicroseconds::now());
+        let session_token = SessionToken::new(
+            "user_id".to_string(),
+            DateTimeAsMicroseconds::now(),
+            "127.0.0.1".to_string(),
+        );
 
         let token_as_str = session_token.into_token(&token_key);
 
