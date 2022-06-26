@@ -10,10 +10,17 @@ pub struct IsAliveMiddleware {
 
 impl IsAliveMiddleware {
     pub fn new(app_name: String, app_version: String) -> Self {
+        let env_info = if let Ok(env_info) = std::env::var("ENV_INFO") {
+            Some(env_info)
+        } else {
+            None
+        };
+
         Self {
             is_alive: IsAliveContract {
                 name: app_name,
                 version: app_version,
+                env_info,
             },
         }
     }
@@ -40,4 +47,5 @@ impl HttpServerMiddleware for IsAliveMiddleware {
 pub struct IsAliveContract {
     name: String,
     version: String,
+    env_info: Option<String>,
 }
