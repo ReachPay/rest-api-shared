@@ -25,3 +25,7 @@ signal-hook = "*"
 prost-types = "*"
 enc_file = "*"
 base64 = "*"
+
+
+serde_json = "*"
+serde_repr = "*"
