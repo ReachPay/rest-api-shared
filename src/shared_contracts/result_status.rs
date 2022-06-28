@@ -18,6 +18,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-4"; description="Token is expired")]
     TokenIsExpired = -4,
+
+    #[http_enum_case(id="-5"; description="Validation Error")]
+    ValidationError = -5,
 }
 
 #[cfg(test)]
