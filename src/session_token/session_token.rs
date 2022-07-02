@@ -1,6 +1,5 @@
+use encryption::aes::AesKey;
 use rust_extensions::date_time::DateTimeAsMicroseconds;
-
-use super::TokenKey;
 
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionToken {
@@ -33,23 +32,27 @@ impl SessionToken {
         self.expires
     }
 
-    pub fn into_token(&self, token_key: &TokenKey) -> String {
+    pub fn into_token(&self, session_encryption_key: &AesKey) -> String {
         let mut token_payload = Vec::new();
         prost::Message::encode(self, &mut token_payload).unwrap();
 
-        let ciphertext = enc_file::encrypt_aes(token_payload, token_key.key.as_str()).unwrap();
+        let ciphertext = encryption::aes::encrypt(session_encryption_key, token_payload.as_slice());
 
         base64::encode(ciphertext)
     }
 
-    pub fn parse_from_token(token_as_str: &str, token_key: &TokenKey) -> Option<SessionToken> {
+    pub fn parse_from_token(
+        token_as_str: &str,
+        session_encryption_key: &AesKey,
+    ) -> Option<SessionToken> {
         let encoded_token = base64::decode(token_as_str);
 
         if encoded_token.is_err() {
             return None;
         }
 
-        let result = enc_file::decrypt_aes(encoded_token.unwrap(), token_key.key.as_str());
+        let result =
+            encryption::aes::decrypt(session_encryption_key, encoded_token.unwrap().as_slice());
 
         if result.is_err() {
             return None;
@@ -72,9 +75,8 @@ mod test {
     #[test]
     fn test_encrypt_decrypt() {
         use super::*;
-        use crate::session_token::TokenKey;
 
-        let token_key = TokenKey::from_string_token("an exampaaaaaaaaaaaaaaaaaaaaaaaa");
+        let token_key = AesKey::new(b"012345678901234567890123456789012345678901234567");
 
         let session_token = SessionToken::new(
             "user_id".to_string(),
