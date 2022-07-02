@@ -1,24 +1,22 @@
-use std::collections::HashMap;
-
-use encryption::aes::AesKey;
 use my_http_server::{
     HttpContext, HttpFailResult, HttpOkResult, HttpServerMiddleware, HttpServerRequestFlow,
 };
 use rust_extensions::date_time::DateTimeAsMicroseconds;
+use std::collections::HashMap;
 
-use crate::session_token::SessionToken;
+use crate::session_token::{SessionToken, TokenKey};
 
 const AUTH_HEADER: &str = "authorization";
 pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
-    token_key: AesKey,
+    token_key: TokenKey,
     ignore_full_paths: Option<HashMap<String, ()>>,
     ignore_start_path: Option<Vec<String>>,
 }
 
 impl AuthMiddleware {
-    pub fn new(token_key: AesKey) -> Self {
+    pub fn new(token_key: TokenKey) -> Self {
         Self {
             token_key,
             ignore_full_paths: None,
@@ -26,7 +24,7 @@ impl AuthMiddleware {
         }
     }
 
-    pub fn new_with_default_paths_to_ignore(token_key: AesKey) -> Self {
+    pub fn new_with_default_paths_to_ignore(token_key: TokenKey) -> Self {
         let mut result = Self::new(token_key);
         result.add_start_path_to_ignore("/swagger");
         result
