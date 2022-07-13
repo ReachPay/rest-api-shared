@@ -30,6 +30,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-8"; description="No liquidity")]
     NoLiquidity = -8,
+
+    #[http_enum_case(id="-9"; description="Exchange by this pair is disabled")]
+    ExchangeByThisPairIsDisabled = -9,
 }
 
 #[cfg(test)]
