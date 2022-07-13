@@ -27,6 +27,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-7"; description="Asset not found")]
     AssetNoFound = -7,
+
+    #[http_enum_case(id="-8"; description="No liquidity")]
+    NoLiquidity = -8,
 }
 
 #[cfg(test)]
