@@ -28,11 +28,14 @@ pub enum ResultStatus {
     #[http_enum_case(id="-7"; description="Asset not found")]
     AssetNoFound = -7,
 
-    #[http_enum_case(id="-8"; description="No liquidity")]
-    NoLiquidity = -8,
+    #[http_enum_case(id="-8"; description="Asset pair not found")]
+    AssetPairNotFound = -8,
 
-    #[http_enum_case(id="-9"; description="Exchange by this pair is disabled")]
-    ExchangeByThisPairIsDisabled = -9,
+    #[http_enum_case(id="-9"; description="No liquidity")]
+    NoLiquidity = -9,
+
+    #[http_enum_case(id="-10"; description="Exchange by this pair is disabled")]
+    ExchangeByThisPairIsDisabled = -10,
 }
 
 #[cfg(test)]
