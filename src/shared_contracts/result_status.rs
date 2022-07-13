@@ -21,6 +21,12 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-5"; description="Validation Error")]
     ValidationError = -5,
+
+    #[http_enum_case(id="-6"; description="Not enough funds")]
+    NotEnoughFunds = -6,
+
+    #[http_enum_case(id="-7"; description="Asset not found")]
+    AssetNoFound = -7,
 }
 
 #[cfg(test)]
