@@ -37,8 +37,9 @@ impl SessionToken {
         let mut token_payload = Vec::new();
         prost::Message::encode(self, &mut token_payload).unwrap();
 
-        let ciphertext =
-            encryption::aes::encrypt(&session_encryption_key.aes_key, token_payload.as_slice());
+        let ciphertext = session_encryption_key
+            .aes_key
+            .encrypt(token_payload.as_slice());
 
         base64::encode(ciphertext)
     }
@@ -53,10 +54,9 @@ impl SessionToken {
             return None;
         }
 
-        let result = encryption::aes::decrypt(
-            &session_encryption_key.aes_key,
-            encoded_token.unwrap().as_slice(),
-        );
+        let result = session_encryption_key
+            .aes_key
+            .decrypt(encoded_token.unwrap().as_slice());
 
         if result.is_err() {
             return None;
