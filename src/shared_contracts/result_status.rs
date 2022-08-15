@@ -36,6 +36,15 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-10"; description="Exchange by this pair is disabled")]
     ExchangeByThisPairIsDisabled = -10,
+
+    #[http_enum_case(id="-11"; description="Order Not Found")]
+    OrderCancelationFail = -11,
+
+    #[http_enum_case(id="-12"; description="Order is already expired")]
+    OrderIsAlreadyExpired = -12,
+
+    #[http_enum_case(id="-13"; description="Order is paid")]
+    OrderIsPaid = -13,
 }
 
 #[cfg(test)]
