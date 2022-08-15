@@ -38,7 +38,7 @@ pub enum ResultStatus {
     ExchangeByThisPairIsDisabled = -10,
 
     #[http_enum_case(id="-11"; description="Order Not Found")]
-    OrderCancelationFail = -11,
+    OrderIsNotFound = -11,
 
     #[http_enum_case(id="-12"; description="Order is already expired")]
     OrderIsAlreadyExpired = -12,
