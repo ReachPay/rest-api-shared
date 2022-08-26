@@ -45,6 +45,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-13"; description="Order is paid")]
     OrderIsPaid = -13,
+
+    #[http_enum_case(id="-14"; description="Issuer and payer can not be the same")]
+    IssuerAndPayerCanNotBeTheSame = -14,
 }
 
 #[cfg(test)]
