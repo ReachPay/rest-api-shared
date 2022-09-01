@@ -48,6 +48,12 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-14"; description="Issuer and payer can not be the same")]
     IssuerAndPayerCanNotBeTheSame = -14,
+
+    #[http_enum_case(id="-15"; description="Order payer is not set")]
+    OrderPayerIsNotSet = -15,
+
+    #[http_enum_case(id="-16"; description="You are not the payer of the order")]
+    YouAreNotThePayerOfTheOrder = -16,
 }
 
 #[cfg(test)]
