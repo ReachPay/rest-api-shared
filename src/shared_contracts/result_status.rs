@@ -54,6 +54,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-16"; description="You are not the payer of the order")]
     YouAreNotThePayerOfTheOrder = -16,
+
+    #[http_enum_case(id="-17"; description="Crypto deposit operation is not supported")]
+    CryptoDepositIsNotSupported = -17,
 }
 
 #[cfg(test)]
