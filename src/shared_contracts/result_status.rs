@@ -57,6 +57,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-17"; description="Crypto deposit operation is not supported")]
     CryptoDepositIsNotSupported = -17,
+
+    #[http_enum_case(id="-18"; description="Order is canceled")]
+    OrderIsCanceled = -18,
 }
 
 #[cfg(test)]
