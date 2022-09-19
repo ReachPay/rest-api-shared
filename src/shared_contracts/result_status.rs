@@ -60,6 +60,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-18"; description="Order is canceled")]
     OrderIsCanceled = -18,
+
+    #[http_enum_case(id="-19"; description="Not merchant")]
+    NotMerchant = -19,
 }
 
 #[cfg(test)]
