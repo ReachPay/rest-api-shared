@@ -1,8 +1,8 @@
 use my_http_server::{
-    HttpContext, HttpFailResult, HttpOkResult, HttpServerMiddleware, HttpServerRequestFlow,
+    HttpContext, HttpFailResult, HttpOkResult, HttpPath, HttpServerMiddleware,
+    HttpServerRequestFlow,
 };
 use rust_extensions::date_time::DateTimeAsMicroseconds;
-use std::collections::HashMap;
 
 use crate::session_token::{SessionToken, TokenKey};
 
@@ -11,8 +11,8 @@ pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
     token_key: TokenKey,
-    ignore_full_paths: Option<HashMap<String, ()>>,
-    ignore_start_path: Option<Vec<String>>,
+    ignore_full_paths: Option<Vec<HttpPath>>,
+    ignore_start_path: Option<Vec<HttpPath>>,
 }
 
 impl AuthMiddleware {
@@ -30,14 +30,18 @@ impl AuthMiddleware {
         result
     }
 
-    pub fn path_is_ignored(&self, path: &str) -> bool {
+    pub fn path_is_ignored(&self, http_path: &HttpPath) -> bool {
         if let Some(ref items) = self.ignore_full_paths {
-            return items.contains_key(path);
+            for full_path_to_ignore in items {
+                if http_path.is_the_same_to(full_path_to_ignore) {
+                    return true;
+                }
+            }
         }
 
         if let Some(ref items) = self.ignore_start_path {
-            for item in items {
-                if path.starts_with(item) {
+            for start_path_to_ignore in items {
+                if http_path.is_starting_with(start_path_to_ignore) {
                     return true;
                 }
             }
@@ -48,13 +52,13 @@ impl AuthMiddleware {
 
     pub fn add_full_path_to_ignore(&mut self, path: &str) {
         if self.ignore_full_paths.is_none() {
-            self.ignore_full_paths = Some(HashMap::new());
+            self.ignore_full_paths = Some(Vec::new());
         }
 
         self.ignore_full_paths
             .as_mut()
             .unwrap()
-            .insert(path.to_string(), ());
+            .push(HttpPath::from_str(path));
     }
 
     pub fn add_start_path_to_ignore(&mut self, path: &str) {
@@ -65,7 +69,7 @@ impl AuthMiddleware {
         self.ignore_start_path
             .as_mut()
             .unwrap()
-            .push(path.to_string());
+            .push(HttpPath::from_str(path));
     }
 }
 
@@ -76,8 +80,7 @@ impl HttpServerMiddleware for AuthMiddleware {
         ctx: &mut HttpContext,
         get_next: &mut HttpServerRequestFlow,
     ) -> Result<HttpOkResult, HttpFailResult> {
-        let path = ctx.request.get_path_lower_case();
-        if self.path_is_ignored(path) {
+        if self.path_is_ignored(&ctx.request.http_path) {
             return get_next.next(ctx).await;
         }
 
