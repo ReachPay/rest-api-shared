@@ -65,7 +65,7 @@ pub enum ResultStatus {
     NotMerchant = -19,
     
     #[http_enum_case(id="-20"; description="Wallet not whitelisted")]
-    NotMerchant = -20,
+    WalletNotWhitelisted = -20,
 }
 
 #[cfg(test)]
