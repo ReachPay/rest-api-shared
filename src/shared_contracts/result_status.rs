@@ -61,10 +61,10 @@ pub enum ResultStatus {
     #[http_enum_case(id=-18; description="Order is canceled")]
     OrderIsCanceled = -18,
 
-    #[http_enum_case(id=-19; description="Not merchant")]
+    #[http_enum_case(id=-19; description="Operation allowed only for a merchant account")]
     NotMerchant = -19,
-    
-    #[http_enum_case(id="-20"; description="Wallet not whitelisted")]
+
+    #[http_enum_case(id=-20; description="Wallet is not whitelisted")]
     WalletNotWhitelisted = -20,
 }
 
