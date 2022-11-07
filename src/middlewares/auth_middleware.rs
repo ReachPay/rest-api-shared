@@ -7,7 +7,6 @@ use rust_extensions::date_time::DateTimeAsMicroseconds;
 use crate::session_token::{SessionToken, TokenKey};
 
 const AUTH_HEADER: &str = "authorization";
-pub const KV_USER_ID: &str = "USER_ID";
 
 pub struct AuthMiddleware {
     token_key: TokenKey,
@@ -98,10 +97,7 @@ impl HttpServerMiddleware for AuthMiddleware {
                         ));
                     }
 
-                    ctx.request.set_key_value(
-                        KV_USER_ID.to_string(),
-                        session_token.receive_user_id().into_bytes(),
-                    );
+                    ctx.credentials = Some(Box::new(session_token));
                     return get_next.next(ctx).await;
                 } else {
                     return Err(HttpFailResult::as_unauthorized(
