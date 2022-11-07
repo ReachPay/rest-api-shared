@@ -1,4 +1,4 @@
-use my_http_server::{HttpContext, RequestCredentials};
+use my_http_server::HttpContext;
 
 const ENGLISH: &str = "en";
 
@@ -24,9 +24,7 @@ pub trait GetLanguageId {
     fn get_language_id(&self) -> LanguageId;
 }
 
-impl<TRequestCredentials: RequestCredentials + Send + Sync + 'static> GetLanguageId
-    for HttpContext<TRequestCredentials>
-{
+impl GetLanguageId for HttpContext {
     fn get_language_id(&self) -> LanguageId {
         LanguageId::default()
     }

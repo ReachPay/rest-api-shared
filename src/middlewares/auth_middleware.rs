@@ -75,11 +75,10 @@ impl AuthMiddleware {
 
 #[async_trait::async_trait]
 impl HttpServerMiddleware for AuthMiddleware {
-    type TRequestCredentials = SessionToken;
     async fn handle_request(
         &self,
-        ctx: &mut HttpContext<SessionToken>,
-        get_next: &mut HttpServerRequestFlow<SessionToken>,
+        ctx: &mut HttpContext,
+        get_next: &mut HttpServerRequestFlow,
     ) -> Result<HttpOkResult, HttpFailResult> {
         if self.path_is_ignored(&ctx.request.http_path) {
             return get_next.next(ctx).await;
