@@ -1,6 +1,17 @@
+use my_http_server::{HttpRequest, RequestCredentials};
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use super::TokenKey;
+
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SessionClaim {
+    #[prost(string, tag = "1")]
+    pub id: ::prost::alloc::string::String,
+    #[prost(int64, tag = "2")]
+    pub expires: i64,
+    #[prost(optional, string, tag = "3")]
+    pub ip: Option<::prost::alloc::string::String>,
+}
 
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionToken {
@@ -10,14 +21,49 @@ pub struct SessionToken {
     pub expires: i64,
     #[prost(string, tag = "3")]
     pub ip: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "4")]
+    pub claims: Vec<SessionClaim>,
+}
+
+impl RequestCredentials for SessionToken {
+    fn get_id(&self) -> &str {
+        &self.user_id
+    }
+
+    fn get_claim(&self, req: &HttpRequest, claim_id: &str) -> Option<&str> {
+        let now = DateTimeAsMicroseconds::now();
+
+        for claim in &self.claims {
+            if claim.id == claim_id {
+                if claim.expires > now.unix_microseconds {
+                    return None;
+                }
+
+                if let Some(ip) = claim.ip.as_ref() {
+                    if req.get_ip().get_real_ip() != ip {
+                        return None;
+                    }
+                }
+                return Some(&claim.id);
+            }
+        }
+
+        None
+    }
 }
 
 impl SessionToken {
-    pub fn new(user_id: String, expires: DateTimeAsMicroseconds, ip: String) -> Self {
+    pub fn new(
+        user_id: String,
+        expires: DateTimeAsMicroseconds,
+        ip: String,
+        claims: Vec<SessionClaim>,
+    ) -> Self {
         SessionToken {
             user_id,
             expires: expires.unix_microseconds,
             ip,
+            claims,
         }
     }
 
@@ -86,6 +132,7 @@ mod test {
             "user_id".to_string(),
             DateTimeAsMicroseconds::now(),
             "127.0.0.1".to_string(),
+            vec![],
         );
 
         let token_as_str = session_token.into_token(&token_key);

@@ -1,16 +1,15 @@
 use my_http_server::{HttpContext, HttpFailResult};
 
-use crate::middlewares::KV_USER_ID;
+use crate::session_token::SessionToken;
 
 pub trait GetClientId {
     fn get_client_id(&self) -> Result<&str, HttpFailResult>;
 }
 
-impl GetClientId for HttpContext {
+impl GetClientId for HttpContext<SessionToken> {
     fn get_client_id(&self) -> Result<&str, HttpFailResult> {
-        if let Some(client_id) = self.request.get_key_value(KV_USER_ID) {
-            let result = std::str::from_utf8(client_id).unwrap();
-            return Ok(result);
+        if let Some(session_token) = &self.credentials {
+            return Ok(&session_token.user_id);
         }
 
         return Err(HttpFailResult::as_unauthorized(
