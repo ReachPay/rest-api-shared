@@ -1,4 +1,4 @@
-use my_http_server::{HttpRequest, RequestCredentials};
+use my_http_server::{RequestClaim, RequestCredentials};
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use super::TokenKey;
@@ -9,8 +9,8 @@ pub struct SessionClaim {
     pub id: ::prost::alloc::string::String,
     #[prost(int64, tag = "2")]
     pub expires: i64,
-    #[prost(optional, string, tag = "3")]
-    pub ip: Option<::prost::alloc::string::String>,
+    #[prost(repeated, string, tag = "3")]
+    pub ip: Vec<::prost::alloc::string::String>,
 }
 
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -30,25 +30,28 @@ impl RequestCredentials for SessionToken {
         &self.user_id
     }
 
-    fn get_claim(&self, req: &HttpRequest, claim_id: &str) -> Option<&str> {
-        let now = DateTimeAsMicroseconds::now();
-
-        for claim in &self.claims {
-            if claim.id == claim_id {
-                if claim.expires > now.unix_microseconds {
-                    return None;
-                }
-
-                if let Some(ip) = claim.ip.as_ref() {
-                    if req.get_ip().get_real_ip() != ip {
-                        return None;
-                    }
-                }
-                return Some(&claim.id);
-            }
+    fn get_claims(&self) -> Option<Vec<RequestClaim>> {
+        if self.claims.len() == 0 {
+            return None;
         }
 
-        None
+        let mut result = Vec::new();
+
+        for claim in &self.claims {
+            let item = RequestClaim {
+                id: claim.id.as_str(),
+                expires: DateTimeAsMicroseconds::new(claim.expires),
+                allowed_ips: if claim.ip.len() == 0 {
+                    None
+                } else {
+                    Some(&claim.ip)
+                },
+            };
+
+            result.push(item);
+        }
+
+        Some(result)
     }
 }
 
