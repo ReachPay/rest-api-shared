@@ -86,7 +86,7 @@ impl HttpServerMiddleware for AuthMiddleware {
         match ctx.request.get_headers().get(AUTH_HEADER) {
             Some(header) => {
                 if let Some(session_token) = SessionToken::parse_from_token(
-                    std::str::from_utf8(header.as_bytes()).unwrap(),
+                    std::str::from_utf8(extract_token(header.as_bytes())).unwrap(),
                     &self.token_key,
                 ) {
                     let now = DateTimeAsMicroseconds::now();
@@ -111,5 +111,33 @@ impl HttpServerMiddleware for AuthMiddleware {
                 ));
             }
         }
+    }
+}
+
+fn extract_token(src: &[u8]) -> &[u8] {
+    for i in 0..src.len() {
+        if src[i] == b' ' {
+            return &src[(i + 1)..];
+        }
+    }
+    src
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::middlewares::auth_middleware::extract_token;
+
+    #[test]
+    fn test_extract_token() {
+        let src = b"Bearer 1234567890";
+        let result = extract_token(src);
+        assert_eq!(result, b"1234567890");
+    }
+
+    #[test]
+    fn test_extract_token_without_bearer() {
+        let src = b"1234567890";
+        let result = extract_token(src);
+        assert_eq!(result, b"1234567890");
     }
 }
