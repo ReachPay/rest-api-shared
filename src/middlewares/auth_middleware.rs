@@ -115,10 +115,8 @@ impl HttpServerMiddleware for AuthMiddleware {
 }
 
 fn extract_token(src: &[u8]) -> &[u8] {
-    for i in 0..src.len() {
-        if src[i] == b' ' {
-            return &src[(i + 1)..];
-        }
+    if src[6] == b' ' {
+        return &src[7..];
     }
     src
 }
