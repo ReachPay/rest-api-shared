@@ -6,6 +6,8 @@ use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::session_token::{SessionToken, TokenKey};
 
+use super::UnathorizedRequestResponse;
+
 const AUTH_HEADER: &str = "authorization";
 
 pub struct AuthMiddleware {
@@ -21,12 +23,6 @@ impl AuthMiddleware {
             ignore_full_paths: None,
             ignore_start_path: None,
         }
-    }
-
-    pub fn new_with_default_paths_to_ignore(token_key: TokenKey) -> Self {
-        let mut result = Self::new(token_key);
-        result.add_start_path_to_ignore("/swagger");
-        result
     }
 
     pub fn path_is_ignored(&self, http_path: &HttpPath) -> bool {
@@ -92,22 +88,25 @@ impl HttpServerMiddleware for AuthMiddleware {
                     let now = DateTimeAsMicroseconds::now();
 
                     if now.unix_microseconds >= session_token.get_expires_microseconds() {
-                        return Err(HttpFailResult::as_unauthorized(
-                            "Token is expired".to_string().into(),
+                        return Err(UnathorizedRequestResponse::new(
+                            super::UnauthorizedReasonCode::SessionTokenIsExpired,
+                            "Session token is expired".to_string(),
                         ));
                     }
 
                     ctx.credentials = Some(Box::new(session_token));
                     return get_next.next(ctx).await;
                 } else {
-                    return Err(HttpFailResult::as_unauthorized(
-                        "Invalid token".to_string().into(),
+                    return Err(UnathorizedRequestResponse::new(
+                        super::UnauthorizedReasonCode::InvalidSesionToken,
+                        "Invalid session token".to_string(),
                     ));
                 }
             }
             None => {
-                return Err(HttpFailResult::as_unauthorized(
-                    "Token is missing".to_string().into(),
+                return Err(UnathorizedRequestResponse::new(
+                    super::UnauthorizedReasonCode::InvalidSesionToken,
+                    "No token found".to_string(),
                 ));
             }
         }
