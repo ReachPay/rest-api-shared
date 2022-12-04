@@ -44,6 +44,6 @@ pub enum UnauthorizedReasonCode {
     SessionTokenIsExpired = 2,
     #[http_enum_case(id=3; description="Refresh token is not valid")]
     RefreshTokenIsNotValid = 3,
-    #[http_enum_case(id=4; description="Refresh token is not valid")]
+    #[http_enum_case(id=4; description="Claim authorization is required")]
     Unauthorzed = 4,
 }
