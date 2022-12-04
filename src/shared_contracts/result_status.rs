@@ -66,6 +66,9 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-20"; description="Wallet is not whitelisted")]
     WalletNotWhitelisted = -20,
+    
+    #[http_enum_case(id="-21"; description="Invalid 2fa code")]
+    Invalid2FaCode = -21,
 }
 
 #[cfg(test)]
