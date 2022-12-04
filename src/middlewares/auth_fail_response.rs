@@ -7,11 +7,22 @@ use serde_repr::*;
 pub struct UnathorizedRequestResponse {
     pub reason: UnauthorizedReasonCode,
     pub message: String,
+    #[serde(rename = "claim")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claim: Option<String>,
 }
 
 impl UnathorizedRequestResponse {
-    pub fn new(reason: UnauthorizedReasonCode, message: String) -> HttpFailResult {
-        let result = UnathorizedRequestResponse { reason, message };
+    pub fn new(
+        reason: UnauthorizedReasonCode,
+        message: String,
+        claim: Option<String>,
+    ) -> HttpFailResult {
+        let result = UnathorizedRequestResponse {
+            reason,
+            message,
+            claim,
+        };
 
         let content = serde_json::to_vec(&result).unwrap();
         HttpFailResult {
@@ -28,9 +39,11 @@ impl UnathorizedRequestResponse {
 #[repr(i16)]
 pub enum UnauthorizedReasonCode {
     #[http_enum_case(id=1; description="Invalid session token")]
-    InvalidSesionToken = 1,
+    InvalidSessionToken = 1,
     #[http_enum_case(id=2; description="Session token is expired")]
     SessionTokenIsExpired = 2,
     #[http_enum_case(id=3; description="Refresh token is not valid")]
     RefreshTokenIsNotValid = 3,
+    #[http_enum_case(id=4; description="Refresh token is not valid")]
+    Unauthorzed = 4,
 }

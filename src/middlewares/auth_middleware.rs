@@ -91,6 +91,7 @@ impl HttpServerMiddleware for AuthMiddleware {
                         return Err(UnathorizedRequestResponse::new(
                             super::UnauthorizedReasonCode::SessionTokenIsExpired,
                             "Session token is expired".to_string(),
+                            None,
                         ));
                     }
 
@@ -98,15 +99,17 @@ impl HttpServerMiddleware for AuthMiddleware {
                     return get_next.next(ctx).await;
                 } else {
                     return Err(UnathorizedRequestResponse::new(
-                        super::UnauthorizedReasonCode::InvalidSesionToken,
+                        super::UnauthorizedReasonCode::InvalidSessionToken,
                         "Invalid session token".to_string(),
+                        None,
                     ));
                 }
             }
             None => {
                 return Err(UnathorizedRequestResponse::new(
-                    super::UnauthorizedReasonCode::InvalidSesionToken,
-                    "No token found".to_string(),
+                    super::UnauthorizedReasonCode::InvalidSessionToken,
+                    "No session token found".to_string(),
+                    None,
                 ));
             }
         }
