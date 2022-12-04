@@ -1,9 +1,9 @@
 use my_http_server::HttpFailResult;
-use my_http_server_swagger::MyHttpIntegerEnum;
+use my_http_server_swagger::{MyHttpIntegerEnum, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, MyHttpObjectStructure)]
 pub struct UnathorizedRequestResponse {
     pub reason: UnauthorizedReasonCode,
     pub message: String,
