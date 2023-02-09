@@ -23,6 +23,8 @@ pub struct SessionToken {
     pub ip: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "4")]
     pub claims: Vec<SessionClaim>,
+    #[prost(message, tag = "5")]
+    pub merchant_id: Option<::prost::alloc::string::String>,
 }
 
 impl RequestCredentials for SessionToken {
@@ -61,17 +63,23 @@ impl SessionToken {
         expires: DateTimeAsMicroseconds,
         ip: String,
         claims: Vec<SessionClaim>,
+        merchant_id: Option<String>,
     ) -> Self {
         SessionToken {
             user_id,
             expires: expires.unix_microseconds,
             ip,
             claims,
+            merchant_id,
         }
     }
 
     pub fn get_user_id(&self) -> &str {
         &self.user_id
+    }
+
+    pub fn get_merchant_id(&self) -> Option<String> {
+        self.merchant_id.clone()
     }
 
     pub fn receive_user_id(self) -> String {
@@ -136,6 +144,7 @@ mod test {
             DateTimeAsMicroseconds::now(),
             "127.0.0.1".to_string(),
             vec![],
+            Some("test_merchant_id".to_string()),
         );
 
         let token_as_str = session_token.into_token(&token_key);
