@@ -79,7 +79,7 @@ impl HttpServerMiddleware for AuthMiddleware {
             return get_next.next(ctx).await;
         }
 
-        match ctx.request.get_headers().get(AUTH_HEADER) {
+        match ctx.request.get_header(AUTH_HEADER) {
             Some(header) => {
                 if let Some(session_token) = SessionToken::parse_from_token(
                     std::str::from_utf8(extract_token(header.as_bytes())).unwrap(),
