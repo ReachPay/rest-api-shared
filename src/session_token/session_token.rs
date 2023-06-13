@@ -94,11 +94,11 @@ impl SessionToken {
         let mut token_payload = Vec::new();
         prost::Message::encode(self, &mut token_payload).unwrap();
 
-        let ciphertext = session_encryption_key
+        let cipher_text = session_encryption_key
             .aes_key
             .encrypt(token_payload.as_slice());
 
-        base64::encode(ciphertext)
+        base64::encode(cipher_text)
     }
 
     pub fn parse_from_token(
