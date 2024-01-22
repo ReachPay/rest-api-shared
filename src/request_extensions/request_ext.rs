@@ -1,10 +1,10 @@
 use service_sdk::my_http_server::{HttpContext, HttpFailResult};
 
-pub trait RequestExtentions {
+pub trait RequestExtensions {
     fn get_user_id(&self) -> Result<&str, HttpFailResult>;
 }
 
-impl RequestExtentions for HttpContext {
+impl RequestExtensions for HttpContext {
     fn get_user_id(&self) -> Result<&str, HttpFailResult> {
         match &self.credentials {
             Some(value) => {
