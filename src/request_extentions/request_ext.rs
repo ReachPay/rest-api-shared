@@ -1,4 +1,4 @@
-use my_http_server::{HttpContext, HttpFailResult};
+use service_sdk::my_http_server::{HttpContext, HttpFailResult};
 
 pub trait RequestExtentions {
     fn get_user_id(&self) -> Result<&str, HttpFailResult>;

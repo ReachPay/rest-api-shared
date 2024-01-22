@@ -1,10 +1,11 @@
-use my_http_server::HttpFailResult;
-use my_http_server_swagger::{MyHttpIntegerEnum, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
-
+use service_sdk::my_http_server;
+use service_sdk::my_http_server::macros::*;
+use service_sdk::my_http_server::HttpFailResult;
+use service_sdk::my_telemetry::TelemetryEventTagsBuilder;
 #[derive(Serialize, Deserialize, Debug, MyHttpObjectStructure)]
-pub struct UnathorizedRequestResponse {
+pub struct UnauthorizedRequestResponse {
     pub reason: UnauthorizedReasonCode,
     pub message: String,
     #[serde(rename = "claim")]
@@ -12,13 +13,13 @@ pub struct UnathorizedRequestResponse {
     pub claim: Option<String>,
 }
 
-impl UnathorizedRequestResponse {
+impl UnauthorizedRequestResponse {
     pub fn new(
         reason: UnauthorizedReasonCode,
         message: String,
         claim: Option<String>,
     ) -> HttpFailResult {
-        let result = UnathorizedRequestResponse {
+        let result = UnauthorizedRequestResponse {
             reason,
             message,
             claim,
@@ -31,6 +32,7 @@ impl UnathorizedRequestResponse {
             content,
             write_telemetry: false,
             write_to_log: false,
+            add_telemetry_tags: TelemetryEventTagsBuilder::new(),
         }
     }
 }

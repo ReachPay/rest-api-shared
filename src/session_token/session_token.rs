@@ -1,8 +1,11 @@
-use my_http_server::{RequestClaim, RequestCredentials};
-use rust_extensions::date_time::DateTimeAsMicroseconds;
+service_sdk::macros::use_my_http_server!();
+use service_sdk::rust_extensions::{
+    base64::{FromBase64, IntoBase64},
+    date_time::DateTimeAsMicroseconds,
+};
 
 use super::TokenKey;
-
+#[allow(non_snake_case)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionClaim {
     #[prost(string, tag = "1")]
@@ -13,6 +16,7 @@ pub struct SessionClaim {
     pub ip: Vec<::prost::alloc::string::String>,
 }
 
+#[allow(non_snake_case)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SessionToken {
     #[prost(string, tag = "1")]
@@ -98,14 +102,14 @@ impl SessionToken {
             .aes_key
             .encrypt(token_payload.as_slice());
 
-        base64::encode(cipher_text)
+        cipher_text.into_base64()
     }
 
     pub fn parse_from_token(
         token_as_str: &str,
         session_encryption_key: &TokenKey,
     ) -> Option<SessionToken> {
-        let encoded_token = base64::decode(token_as_str);
+        let encoded_token = token_as_str.from_base64();
 
         if encoded_token.is_err() {
             return None;

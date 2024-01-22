@@ -1,5 +1,4 @@
-use my_http_server::{HttpContext, HttpFailResult};
-
+use service_sdk::my_http_server::*;
 pub trait GetClientId {
     fn get_client_id(&self) -> Result<&str, HttpFailResult>;
 }
@@ -11,7 +10,7 @@ impl GetClientId for HttpContext {
         }
 
         return Err(HttpFailResult::as_unauthorized(
-            "Can not get client Id. Looks like request is unathorised"
+            "Can not get client Id. Looks like request is un-authorized"
                 .to_string()
                 .into(),
         ));

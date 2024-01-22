@@ -1,12 +1,12 @@
-use my_http_server::{
-    HttpContext, HttpFailResult, HttpOkResult, HttpPath, HttpServerMiddleware,
+use service_sdk::my_http_server::{
+    HttpContext, HttpFailResult, HttpOkResult, HttpPath, HttpRequestHeaders, HttpServerMiddleware,
     HttpServerRequestFlow,
 };
-use rust_extensions::date_time::DateTimeAsMicroseconds;
+use service_sdk::rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::session_token::{SessionToken, TokenKey};
 
-use super::UnathorizedRequestResponse;
+use super::UnauthorizedRequestResponse;
 
 const AUTH_HEADER: &str = "authorization";
 
@@ -79,16 +79,20 @@ impl HttpServerMiddleware for AuthMiddleware {
             return get_next.next(ctx).await;
         }
 
-        match ctx.request.get_header(AUTH_HEADER) {
+        match ctx
+            .request
+            .get_headers()
+            .try_get_case_insensitive(AUTH_HEADER)
+        {
             Some(header) => {
                 if let Some(session_token) = SessionToken::parse_from_token(
-                    std::str::from_utf8(extract_token(header.as_bytes())).unwrap(),
+                    std::str::from_utf8(extract_token(header.value)).unwrap(),
                     &self.token_key,
                 ) {
                     let now = DateTimeAsMicroseconds::now();
 
                     if now.unix_microseconds >= session_token.get_expires_microseconds() {
-                        return Err(UnathorizedRequestResponse::new(
+                        return Err(UnauthorizedRequestResponse::new(
                             super::UnauthorizedReasonCode::SessionTokenIsExpired,
                             "Session token is expired".to_string(),
                             None,
@@ -98,7 +102,7 @@ impl HttpServerMiddleware for AuthMiddleware {
                     ctx.credentials = Some(Box::new(session_token));
                     return get_next.next(ctx).await;
                 } else {
-                    return Err(UnathorizedRequestResponse::new(
+                    return Err(UnauthorizedRequestResponse::new(
                         super::UnauthorizedReasonCode::InvalidSessionToken,
                         "Invalid session token".to_string(),
                         None,
@@ -106,7 +110,7 @@ impl HttpServerMiddleware for AuthMiddleware {
                 }
             }
             None => {
-                return Err(UnathorizedRequestResponse::new(
+                return Err(UnauthorizedRequestResponse::new(
                     super::UnauthorizedReasonCode::InvalidSessionToken,
                     "No session token found".to_string(),
                     None,

@@ -1,5 +1,6 @@
-use my_http_server_swagger::MyHttpIntegerEnum;
 use serde_repr::*;
+use service_sdk::my_http_server::macros::MyHttpIntegerEnum;
+service_sdk::macros::use_my_http_server!();
 
 #[derive(Serialize_repr, Deserialize_repr, MyHttpIntegerEnum, Debug)]
 #[repr(i16)]
@@ -66,7 +67,7 @@ pub enum ResultStatus {
 
     #[http_enum_case(id="-20"; description="Wallet is not whitelisted")]
     WalletNotWhitelisted = -20,
-    
+
     #[http_enum_case(id="-21"; description="Invalid 2fa code")]
     Invalid2FaCode = -21,
 }
