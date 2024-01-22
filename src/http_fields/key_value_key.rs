@@ -7,7 +7,7 @@ service_sdk::macros::use_my_http_server!();
 #[http_input_field]
 pub struct KeyValueKey(String);
 
-fn process_value(src: &str) -> Result<StrOrString, HttpFailResult> {
+pub fn process_value(src: &str) -> Result<StrOrString, HttpFailResult> {
     if src.len() > 24 {
         return Err(ValidationError::new(
             "Key must be more than 3 and less than 24 symbols".to_string(),
