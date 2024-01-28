@@ -2,7 +2,6 @@ pub mod authorization;
 pub mod lang_id;
 pub mod middlewares;
 pub mod request_extensions;
-pub mod session_token;
 pub mod shared_contracts;
 
 #[cfg(feature = "auth-middleware")]
