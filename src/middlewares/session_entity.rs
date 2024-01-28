@@ -40,6 +40,7 @@ impl SessionEntity {
         merchant_id: String,
         ip: String,
         expires: DateTimeAsMicroseconds,
+        claims: Option<Vec<SessionClaim>>,
     ) -> Self {
         Self {
             partition_key: Self::get_pk().to_string(),
@@ -47,7 +48,7 @@ impl SessionEntity {
             client_id,
             merchant_id,
             expires: expires.to_rfc3339(),
-            claims: None,
+            claims,
             ip,
             time_stamp: "".to_string(),
         }
