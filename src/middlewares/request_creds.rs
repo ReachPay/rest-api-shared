@@ -18,15 +18,17 @@ impl TradingPlatformRequestCredentials {
 
 impl RequestCredentials for TradingPlatformRequestCredentials {
     fn get_id(&self) -> &str {
-        &self.session_entity.trader_id
+        &self.session_entity.client_id
     }
 
     fn get_claims<'s>(&'s self) -> Option<Vec<my_http_server::RequestClaim<'s>>> {
-        let session_claims = self.session_entity.claims.as_ref()?;
+        if self.session_entity.claims.len() == 0 {
+            return None;
+        }
 
-        let mut result = Vec::new();
+        let mut result = Vec::with_capacity(self.session_entity.claims.len());
 
-        for session_claim in session_claims {
+        for session_claim in &self.session_entity.claims {
             result.push(RequestClaim {
                 id: &session_claim.name,
                 expires: DateTimeAsMicroseconds::new(session_claim.expires),

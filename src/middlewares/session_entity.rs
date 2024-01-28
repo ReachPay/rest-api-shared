@@ -13,7 +13,7 @@ pub struct SessionClaim {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionEntity {
-    #[serde(rename = "TraderId")]
+    #[serde(rename = "ClientId")]
     pub client_id: String,
     #[serde(rename = "MerchantId")]
     pub merchant_id: String,
