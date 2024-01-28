@@ -11,12 +11,14 @@ pub struct SessionClaim {
     pub expires: i64,
 }
 
-#[service_sdk::my_no_sql_sdk::macros::my_no_sql_entity("sessionsentites")]
+#[service_sdk::my_no_sql_sdk::macros::my_no_sql_entity("sessions")]
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionEntity {
     #[serde(rename = "TraderId")]
     pub trader_id: String,
+    #[serde(rename = "TraderId")]
+    pub merchant_id: String,
     #[serde(rename = "Expires")]
     pub expires: String,
     #[serde(rename = "Claims")]
