@@ -15,8 +15,10 @@ pub struct SessionClaim {
 pub struct SessionEntity {
     #[serde(rename = "TraderId")]
     pub client_id: String,
-    #[serde(rename = "TraderId")]
+    #[serde(rename = "MerchantId")]
     pub merchant_id: String,
+    #[serde(rename = "Ip")]
+    pub ip: String,
     #[serde(rename = "Expires")]
     pub expires: String,
     #[serde(rename = "Claims")]
@@ -36,6 +38,7 @@ impl SessionEntity {
         session_id: String,
         client_id: String,
         merchant_id: String,
+        ip: String,
         expires: DateTimeAsMicroseconds,
     ) -> Self {
         Self {
@@ -45,6 +48,7 @@ impl SessionEntity {
             merchant_id,
             expires: expires.to_rfc3339(),
             claims: None,
+            ip,
             time_stamp: "".to_string(),
         }
     }
