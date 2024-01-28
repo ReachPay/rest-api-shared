@@ -22,7 +22,7 @@ pub struct SessionEntity {
     #[serde(rename = "Expires")]
     pub expires: String,
     #[serde(rename = "Claims")]
-    pub claims: Option<Vec<SessionClaim>>,
+    pub claims: Vec<SessionClaim>,
 }
 
 impl SessionEntity {
@@ -40,7 +40,7 @@ impl SessionEntity {
         merchant_id: String,
         ip: String,
         expires: DateTimeAsMicroseconds,
-        claims: Option<Vec<SessionClaim>>,
+        claims: Vec<SessionClaim>,
     ) -> Self {
         Self {
             partition_key: Self::get_pk().to_string(),
