@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
-use service_sdk::my_no_sql_sdk;
-
-pub const SESSION_PARTITION_KEY_VALUE: &str = "t";
+use service_sdk::{my_no_sql_sdk, rust_extensions::date_time::DateTimeAsMicroseconds};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SessionClaim {
@@ -16,7 +14,7 @@ pub struct SessionClaim {
 #[serde(rename_all = "camelCase")]
 pub struct SessionEntity {
     #[serde(rename = "TraderId")]
-    pub trader_id: String,
+    pub client_id: String,
     #[serde(rename = "TraderId")]
     pub merchant_id: String,
     #[serde(rename = "Expires")]
@@ -26,11 +24,28 @@ pub struct SessionEntity {
 }
 
 impl SessionEntity {
-    pub fn get_pk() -> String {
-        SESSION_PARTITION_KEY_VALUE.to_string()
+    pub fn get_pk() -> &'static str {
+        "s"
     }
 
     pub fn get_session_token(&self) -> &str {
         &self.row_key
+    }
+
+    pub fn new(
+        session_id: String,
+        client_id: String,
+        merchant_id: String,
+        expires: DateTimeAsMicroseconds,
+    ) -> Self {
+        Self {
+            partition_key: Self::get_pk().to_string(),
+            row_key: session_id,
+            client_id,
+            merchant_id,
+            expires: expires.to_rfc3339(),
+            claims: None,
+            time_stamp: "".to_string(),
+        }
     }
 }
